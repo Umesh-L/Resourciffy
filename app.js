@@ -26,13 +26,17 @@ function createCard(item){
   const el = document.createElement('article')
   el.className = 'card'
   el.dataset.id = item.id
+  const linkHtml = item.link ? `<a class="link" href="${escapeAttr(item.link)}" target="_blank" rel="noreferrer noopener">${escapeHtml(item.link)}</a>` : ''
+  // support legacy single `type` or new `types` array
+  const typesArr = Array.isArray(item.types) ? item.types : (item.type ? [item.type] : [])
+  const badgesHtml = typesArr.length ? typesArr.map(t=>`<span class="badge">${escapeHtml(t)}</span>`).join(' ') : ''
   el.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
       <div class="title">${escapeHtml(item.name)}</div>
-      <div class="badge">${escapeHtml(item.type || '')}</div>
+      <div class="badges">${badgesHtml}</div>
     </div>
     <div class="desc">${escapeHtml(item.description || '')}</div>
-    <a class="link" href="${escapeAttr(item.link)}" target="_blank" rel="noreferrer noopener">${escapeHtml(item.link)}</a>
+    ${linkHtml}
     <div class="meta">
       <small class="muted">ID: ${item.id}</small>
       <div class="btns">
@@ -54,6 +58,32 @@ function escapeHtml(str){
 }
 function escapeAttr(str){
   return escapeHtml(str).replace(/\"/g, '%22')
+}
+
+// Toast notifications helper (replaces alert)
+function showToast(message, type = 'info', ttl = 4500){
+  try{
+    const container = document.getElementById('toast-container')
+    if(!container) throw new Error('no-toast')
+    const t = document.createElement('div')
+    t.className = `toast ${type}`
+    t.setAttribute('role','status')
+    const msg = document.createElement('div')
+    msg.className = 'msg'
+    msg.textContent = message
+    const close = document.createElement('button')
+    close.className = 'close'
+    close.innerHTML = '✕'
+    close.addEventListener('click', ()=>{ t.remove() })
+    t.appendChild(msg)
+    t.appendChild(close)
+    container.appendChild(t)
+    // auto remove
+    setTimeout(()=>{ try{ t.remove() }catch(e){} }, ttl)
+  }catch(e){
+    // fallback to native alert if something goes wrong
+    try{ alert(message) }catch(_){}
+  }
 }
 
 // UI wiring
@@ -101,6 +131,10 @@ function resetForm(){
   nameInput.value = ''
   descInput.value = ''
   linkInput.value = ''
+  // clear type selections
+  if(typeSelect) Array.from(typeSelect.options).forEach(o=>o.selected = false)
+  if(typeOptions) Array.from(typeOptions.children).forEach(ch=> ch.classList.remove('selected'))
+  if(typeDisplay) typeDisplay.textContent = 'Select types'
   nameInput.focus()
 }
 
@@ -110,17 +144,19 @@ form.addEventListener('submit', (e)=>{
   const desc = descInput.value.trim()
   const type = typeSelect ? (typeSelect.value || '') : ''
   const link = linkInput.value.trim()
-  if(!name || !link){
-    alert('Name and link are required.')
+  if(!name){
+    showToast('Name is required.', 'error')
     return
   }
   // basic url normalization
   const normalized = normalizeUrl(link)
+  // collect selected types from hidden select (multiple)
+  const selectedTypes = typeSelect ? Array.from(typeSelect.selectedOptions).map(o=>o.value) : []
   const existingId = idInput.value
   if(existingId){
-    items = items.map(it => it.id === existingId ? {...it, name, description:desc, link:normalized, type} : it)
+    items = items.map(it => it.id === existingId ? {...it, name, description:desc, link:normalized, types: selectedTypes, type: selectedTypes[0] || ''} : it)
   }else{
-    items.push({id: uid(), name, description: desc, link: normalized, type, createdAt: Date.now()})
+    items.push({id: uid(), name, description: desc, link: normalized, types: selectedTypes, type: selectedTypes[0] || '', createdAt: Date.now()})
   }
   saveItems(items)
   resetForm()
@@ -146,8 +182,9 @@ function populateTypes(){
       r.className = 'type-option'
       r.tabIndex = 0
       r.textContent = t
-      r.addEventListener('click', ()=>{ selectType(t) })
-      r.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); selectType(t) } })
+      // toggle selection
+      r.addEventListener('click', ()=>{ toggleTypeSelection(t, r) })
+      r.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggleTypeSelection(t, r) } })
       typeOptions.appendChild(r)
     })
   }
@@ -166,6 +203,38 @@ function populateTypes(){
       typesList.appendChild(pill)
     })
   }
+  // sync display with select (if any pre-selections)
+  updateTypeDisplayFromSelect()
+}
+
+function toggleTypeSelection(typeValue, optionEl){
+  // update hidden select
+  if(typeSelect){
+    const opt = Array.from(typeSelect.options).find(o=>o.value===typeValue)
+    if(opt) opt.selected = !opt.selected
+  }
+  // visual toggle
+  if(optionEl) optionEl.classList.toggle('selected')
+  updateTypeDisplayFromSelect()
+}
+
+function updateTypeDisplayFromSelect(){
+  if(!typeSelect || !typeDisplay) return
+  const selected = Array.from(typeSelect.selectedOptions).map(o=>o.value)
+  typeDisplay.textContent = selected.length ? selected.join(', ') : 'Select types'
+}
+
+function setSelectedTypesForEdit(typesArr){
+  if(!typeSelect) return
+  // clear existing
+  Array.from(typeSelect.options).forEach(o=>o.selected=false)
+  typesArr.forEach(t=>{
+    const opt = Array.from(typeSelect.options).find(o=>o.value===t)
+    if(opt) opt.selected = true
+  })
+  // reflect in custom options
+  Array.from(typeOptions.children).forEach(ch=>{ ch.classList.toggle('selected', typesArr.includes(ch.textContent)) })
+  updateTypeDisplayFromSelect()
 }
 
 function addType(value){
@@ -233,6 +302,9 @@ cardsRoot.addEventListener('click', (e)=>{
     nameInput.value = it.name
     descInput.value = it.description
     linkInput.value = it.link
+    // populate multi-select types
+    const typesArr = Array.isArray(it.types) ? it.types : (it.type ? [it.type] : [])
+    setSelectedTypesForEdit(typesArr)
     nameInput.focus()
   }
   if(btn.classList.contains('delete')){
@@ -249,6 +321,7 @@ clearBtn.addEventListener('click', ()=>{
 
 function normalizeUrl(url){
   try{
+    if(!url) return ''
     if(!/^https?:\/\//i.test(url)) url = 'https://' + url
     const u = new URL(url)
     return u.toString()
@@ -272,7 +345,7 @@ async function saveToDeviceFile(){
       const writable = await handle.createWritable()
       await writable.write(JSON.stringify(items, null, 2))
       await writable.close()
-      alert('Saved to device successfully.')
+  showToast('Exported JSON file (download started).', 'success')
       return
     }
     // Fallback: trigger a download
@@ -285,10 +358,10 @@ async function saveToDeviceFile(){
     a.click()
     a.remove()
     URL.revokeObjectURL(url)
-    alert('Exported JSON file (download started).')
+  showToast('Exported JSON file (download started).', 'success')
   }catch(e){
     console.error(e)
-    alert('Failed to save to device: ' + e.message)
+    showToast('Failed to export resources: ' + (e && e.message ? e.message : String(e)), 'error')
   }
 }
 
@@ -301,14 +374,14 @@ async function loadFromDeviceFile(){
       items = JSON.parse(text || '[]')
       await saveItems(items)
       render()
-      alert('Loaded resources from file.')
+  showToast('Loaded resources from file.', 'success')
       return
     }
     // Else, instruct user to use import file input
     document.getElementById('import-file').click()
   }catch(e){
     console.error(e)
-    alert('Failed to load from device: ' + e.message)
+    showToast('Failed to import resources: ' + (e && e.message ? e.message : String(e)), 'error')
   }
 }
 
@@ -334,20 +407,48 @@ function handleImportFile(file){
         items = json
         saveItems(items)
         render()
-        alert('Imported resources successfully.')
+  showToast('Imported resources successfully.', 'success')
       }else{
-        alert('Imported JSON is not an array of resources.')
+  showToast('Imported JSON is not an array of resources.', 'error')
       }
     }catch(e){
-      alert('Failed to parse JSON: ' + e.message)
+  showToast('Failed to parse JSON: ' + e.message, 'error')
     }
   }
   reader.readAsText(file)
 }
+// Save as PDF: uses window.print() to produce a PDF via the browser print dialog.
+function saveAsPdf(){
+  // Prepare a print-friendly view: add a class to body so CSS can adapt if needed.
+  document.body.classList.add('print-mode')
+  // Give the browser a moment to apply print styles, then open print dialog.
+  setTimeout(()=>{
+    try{
+      // attach cleanup handler for afterprint where available
+      const cleanup = ()=>{
+        document.body.classList.remove('print-mode')
+        window.removeEventListener('afterprint', cleanup)
+        if(mediaQuery) mediaQuery.removeListener(mediaHandler)
+      }
+      // Some browsers fire afterprint; others support matchMedia('print') listeners
+      window.addEventListener('afterprint', cleanup)
+      const mediaQuery = window.matchMedia && window.matchMedia('print')
+      const mediaHandler = (m)=>{ if(!m.matches) cleanup() }
+      if(mediaQuery && mediaQuery.addListener){ mediaQuery.addListener(mediaHandler) }
+
+      window.print()
+    }catch(e){
+      console.error('Print failed', e)
+  showToast('Unable to open print dialog for PDF export.', 'error')
+      // ensure cleanup
+      document.body.classList.remove('print-mode')
+    }
+  }, 80)
+}
 
 // wire file action buttons
-document.getElementById('save-device').addEventListener('click', saveToDeviceFile)
-document.getElementById('load-device').addEventListener('click', loadFromDeviceFile)
+const savePdfBtn = document.getElementById('save-pdf')
+if(savePdfBtn) savePdfBtn.addEventListener('click', saveAsPdf)
 document.getElementById('export-json').addEventListener('click', exportJson)
 const importFile = document.getElementById('import-file')
 importFile.addEventListener('change', (e)=>{

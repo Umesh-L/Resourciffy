@@ -4,14 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Resourciffy</title>
-  <!-- Stylish heading font -->
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <main class="container">
     <header>
-      <h1>Resourciffy</h1>
+      <h1>Resourciffy 📂</h1>
       <p>Save and manage all types of resources in one place.</p>
     </header>
 
@@ -33,9 +32,9 @@
           <div style="display:flex;gap:8px;align-items:center">
             <!-- Custom styled dropdown (keeps a hidden native select for form compatibility) -->
             <div id="type-custom" class="custom-select" style="flex:1;position:relative">
-              <div id="type-display" class="type-display" tabindex="0">Select type</div>
+              <div id="type-display" class="type-display" tabindex="0">Select types</div>
               <div id="type-options" class="type-options" aria-hidden="true" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:40"></div>
-              <select id="type-select" name="type" style="display:none"></select>
+              <select id="type-select" name="type" multiple style="display:none"></select>
             </div>
             <button id="manage-types-btn" type="button">Manage</button>
           </div>
@@ -48,8 +47,8 @@
           </div>
         </div>
         <div class="field">
-          <label for="link">Link</label>
-          <input id="link" name="link" type="url" placeholder="https://example.com" required>
+          <label for="link">Link (optional)</label>
+          <input id="link" name="link" type="url" placeholder="https://example.com">
         </div>
         <div class="actions">
           <button type="submit" id="save-btn">Save</button>
@@ -57,13 +56,12 @@
         </div>
           </form>
           <div class="file-actions" style="margin-top:12px;display:flex;gap:8px">
-        <button id="save-device">Save to device</button>
-        <button id="load-device">Load from device</button>
-        <button id="export-json">Export JSON</button>
+        <button id="export-json">Export JSON file</button>
         <label for="import-file" class="import-label" style="display:inline-block">
           <input id="import-file" type="file" accept="application/json" style="display:none">
-          <button id="import-json" type="button">Import JSON</button>
+          <button id="import-json" type="button">Import JSON file</button>
         </label>
+        <button id="save-pdf">Save as PDF</button>
           </div>
         </section>
       </aside>
@@ -76,6 +74,8 @@
     <footer id="app-footer">
       <small>Resources are stored locally in your browser's localStorage.</small>
     </footer>
+
+    <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
   </main>
 
   <script src="app.js"></script>
