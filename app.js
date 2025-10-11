@@ -183,19 +183,14 @@ function removeType(value){
   populateTypes()
 }
 
-if(manageTypesBtn) manageTypesBtn.addEventListener('click', ()=>{ if(typeManager) typeManager.style.display = typeManager.style.display === 'none' ? 'block' : 'none' })
-// also toggle footer active state when manager toggles
-const appFooter = document.getElementById('app-footer')
-function setFooterActive(active){ if(appFooter){ if(active) appFooter.classList.add('active'); else appFooter.classList.remove('active') } }
-if(manageTypesBtn) manageTypesBtn.addEventListener('click', ()=>{ const open = typeManager && typeManager.style.display !== 'none'; setFooterActive(open) })
-
-// footer toggles manager as well
-if(appFooter){
-  appFooter.addEventListener('click', ()=>{
+if(manageTypesBtn){
+  const appFooter = document.getElementById('app-footer')
+  function setFooterActive(active){ if(appFooter){ if(active) appFooter.classList.add('active'); else appFooter.classList.remove('active') } }
+  manageTypesBtn.addEventListener('click', ()=>{ 
     if(typeManager) typeManager.style.display = typeManager.style.display === 'none' ? 'block' : 'none'
-    setFooterActive(typeManager && typeManager.style.display !== 'none')
+    const open = typeManager && typeManager.style.display !== 'none'
+    setFooterActive(open)
   })
-  appFooter.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); appFooter.click() } })
 }
 if(addTypeBtn) addTypeBtn.addEventListener('click', ()=>{ addType(newTypeInput.value); newTypeInput.value = '' })
 if(newTypeInput) newTypeInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); addType(newTypeInput.value); newTypeInput.value=''; } })

@@ -85,9 +85,8 @@ header h1{margin:0 0 6px;color:var(--accent-2);text-shadow:0 0 12px rgba(0,255,1
 .empty{padding:20px;text-align:center;color:var(--muted)}
 footer{margin-top:10px;color:var(--muted);text-align:center}
 
-/* interactive footer when active */
-#app-footer{padding:12px;border-radius:8px;margin:10px 0;cursor:pointer}
-#app-footer:focus{outline:none;box-shadow:0 0 18px rgba(0,255,136,0.06)}
+/* footer visuals - not interactive by default */
+#app-footer{padding:12px;border-radius:8px;margin:10px 0}
 #app-footer.active{background:linear-gradient(90deg, rgba(0,255,136,0.03), rgba(0,255,136,0.01));border:1px solid rgba(0,255,136,0.06);box-shadow:0 10px 30px rgba(0,255,136,0.06)}
 
 /* Type badge styles */
