@@ -31,7 +31,12 @@
         <div class="field">
           <label for="type-select">Type</label>
           <div style="display:flex;gap:8px;align-items:center">
-            <select id="type-select" name="type" style="flex:1;padding:10px;border-radius:8px;background:transparent;color:inherit;border:1px solid rgba(0,255,136,0.06)"></select>
+            <!-- Custom styled dropdown (keeps a hidden native select for form compatibility) -->
+            <div id="type-custom" class="custom-select" style="flex:1;position:relative">
+              <div id="type-display" class="type-display" tabindex="0">Select type</div>
+              <div id="type-options" class="type-options" aria-hidden="true" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:40"></div>
+              <select id="type-select" name="type" style="display:none"></select>
+            </div>
             <button id="manage-types-btn" type="button">Manage</button>
           </div>
           <div id="type-manager" style="display:none;margin-top:8px">
@@ -68,8 +73,8 @@
       </section>
     </div>
 
-    <footer>
-      <small>Resources are stored locally in your browser's localStorage.</small>
+    <footer id="app-footer" tabindex="0">
+      <small>Resources are stored locally in your browser's localStorage. (Click to toggle Type Manager)</small>
     </footer>
   </main>
 

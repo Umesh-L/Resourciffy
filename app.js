@@ -70,6 +70,9 @@ const typeManager = document.getElementById('type-manager')
 const newTypeInput = document.getElementById('new-type-input')
 const addTypeBtn = document.getElementById('add-type-btn')
 const typesList = document.getElementById('types-list')
+const typeCustom = document.getElementById('type-custom')
+const typeDisplay = document.getElementById('type-display')
+const typeOptions = document.getElementById('type-options')
 
 const TYPES_KEY = 'resource_manager.types'
 
@@ -135,6 +138,19 @@ function populateTypes(){
       typeSelect.appendChild(opt)
     })
   }
+  // custom dropdown populate
+  if(typeOptions){
+    typeOptions.innerHTML = ''
+    types.forEach(t=>{
+      const r = document.createElement('div')
+      r.className = 'type-option'
+      r.tabIndex = 0
+      r.textContent = t
+      r.addEventListener('click', ()=>{ selectType(t) })
+      r.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); selectType(t) } })
+      typeOptions.appendChild(r)
+    })
+  }
   if(typesList){
     typesList.innerHTML = ''
     types.forEach(t=>{
@@ -168,10 +184,46 @@ function removeType(value){
 }
 
 if(manageTypesBtn) manageTypesBtn.addEventListener('click', ()=>{ if(typeManager) typeManager.style.display = typeManager.style.display === 'none' ? 'block' : 'none' })
+// also toggle footer active state when manager toggles
+const appFooter = document.getElementById('app-footer')
+function setFooterActive(active){ if(appFooter){ if(active) appFooter.classList.add('active'); else appFooter.classList.remove('active') } }
+if(manageTypesBtn) manageTypesBtn.addEventListener('click', ()=>{ const open = typeManager && typeManager.style.display !== 'none'; setFooterActive(open) })
+
+// footer toggles manager as well
+if(appFooter){
+  appFooter.addEventListener('click', ()=>{
+    if(typeManager) typeManager.style.display = typeManager.style.display === 'none' ? 'block' : 'none'
+    setFooterActive(typeManager && typeManager.style.display !== 'none')
+  })
+  appFooter.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); appFooter.click() } })
+}
 if(addTypeBtn) addTypeBtn.addEventListener('click', ()=>{ addType(newTypeInput.value); newTypeInput.value = '' })
 if(newTypeInput) newTypeInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); addType(newTypeInput.value); newTypeInput.value=''; } })
 
 populateTypes()
+
+// custom dropdown behavior
+function openTypeOptions(){ if(typeOptions){ typeOptions.style.display='block'; typeOptions.setAttribute('aria-hidden','false'); typeDisplay.classList.add('open') }}
+function closeTypeOptions(){ if(typeOptions){ typeOptions.style.display='none'; typeOptions.setAttribute('aria-hidden','true'); typeDisplay.classList.remove('open') }}
+function toggleTypeOptions(){ if(typeOptions && typeOptions.style.display==='block') closeTypeOptions(); else openTypeOptions() }
+
+function selectType(val){
+  if(!val) return
+  if(typeDisplay) typeDisplay.textContent = val
+  if(typeSelect) typeSelect.value = val
+  closeTypeOptions()
+}
+
+if(typeDisplay){
+  typeDisplay.addEventListener('click', ()=> toggleTypeOptions())
+  typeDisplay.addEventListener('keydown', (e)=>{
+    if(e.key === 'ArrowDown'){ e.preventDefault(); openTypeOptions(); const first = typeOptions.querySelector('.type-option'); if(first) first.focus(); }
+    if(e.key === 'Enter'){ e.preventDefault(); toggleTypeOptions() }
+  })
+}
+
+// close on outside click
+document.addEventListener('click', (e)=>{ if(typeCustom && !typeCustom.contains(e.target)) closeTypeOptions() })
 
 cardsRoot.addEventListener('click', (e)=>{
   const btn = e.target.closest('button')

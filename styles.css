@@ -24,6 +24,16 @@ body{
 .container{height:100vh;display:flex;flex-direction:column}
 header h1{margin:0 0 6px;color:var(--accent-2);text-shadow:0 0 12px rgba(0,255,136,0.2);font-family:'Outfit', system-ui, sans-serif;font-size:2.6rem;letter-spacing:0.6px;background:linear-gradient(90deg,#00ff88,#00ffa8);-webkit-background-clip:text;background-clip:text;color:transparent}
 .form-section{background:linear-gradient(180deg, rgba(10,20,12,0.6), var(--card));padding:22px;border-radius:12px;box-shadow:var(--glow);margin:0;height:100%;display:flex;flex-direction:column;border:1px solid rgba(0,255,136,0.06)}
+/* allow form inner content to scroll instead of expanding the layout */
+.form-section{overflow:auto}
+
+/* ensure flex children can shrink to avoid forcing overflow */
+.form-section form{min-width:0}
+.field{min-width:0}
+.field input,.field textarea,.type-display,.custom-select,#new-type-input{min-width:0;max-width:100%;box-sizing:border-box}
+
+/* allow file action buttons to wrap instead of causing overflow */
+.file-actions{flex-wrap:wrap}
 .field{display:flex;flex-direction:column;margin-bottom:12px}
 .field.name-field{margin-bottom:18px}
 .field label{font-weight:600;margin-bottom:6px}
@@ -75,16 +85,57 @@ header h1{margin:0 0 6px;color:var(--accent-2);text-shadow:0 0 12px rgba(0,255,1
 .empty{padding:20px;text-align:center;color:var(--muted)}
 footer{margin-top:10px;color:var(--muted);text-align:center}
 
+/* interactive footer when active */
+#app-footer{padding:12px;border-radius:8px;margin:10px 0;cursor:pointer}
+#app-footer:focus{outline:none;box-shadow:0 0 18px rgba(0,255,136,0.06)}
+#app-footer.active{background:linear-gradient(90deg, rgba(0,255,136,0.03), rgba(0,255,136,0.01));border:1px solid rgba(0,255,136,0.06);box-shadow:0 10px 30px rgba(0,255,136,0.06)}
+
 /* Type badge styles */
 .badge{background:linear-gradient(90deg, rgba(0,255,136,0.12), rgba(0,255,136,0.04));padding:6px 10px;border-radius:999px;color:var(--accent-2);font-weight:600;font-size:0.9rem;border:1px solid rgba(0,255,136,0.06)}
 .type-pill{display:inline-flex;align-items:center;background:rgba(0,255,136,0.04);padding:6px 8px;border-radius:999px;color:var(--accent-2);font-size:0.9rem;border:1px solid rgba(0,255,136,0.06)}
 .type-pill .type-del{margin-left:8px;background:transparent;border:0;color:var(--accent-2);cursor:pointer}
 .type-del:hover{color:#fff}
 /* Name input spacing and gradient treatment */
-.name-field input[type="text"],.name-field input[type="url"]{padding:14px;border-radius:12px;background:linear-gradient(180deg, rgba(0,255,136,0.02), transparent);border:1px solid rgba(0,255,136,0.06)}
+.name-field input[type="text"],.name-field input[type="url"],#name{padding:14px;border-radius:12px;background:linear-gradient(180deg, rgba(0,255,136,0.02), transparent);border:1px solid rgba(0,255,136,0.06);color:var(--accent-2)}
+.name-field input::placeholder,#name::placeholder{color:rgba(155,217,167,0.4)}
+
+#type-select{display:none}
 
 /* Type select and manage/add button styles */
-#type-select{padding:10px;border-radius:10px;background:linear-gradient(90deg, rgba(0,255,136,0.04), rgba(0,255,136,0.02));border:1px solid rgba(0,255,136,0.06);color:var(--accent-2)}
+#manage-types-btn,#add-type-btn{padding:8px 12px;border-radius:10px;border:0;background:linear-gradient(90deg,#00ff88,#00ffa8);color:#00110a;cursor:pointer;box-shadow:var(--glow);transition:transform .14s}
+#manage-types-btn:hover,#add-type-btn:hover{transform:translateY(-3px)}
+#manage-types-btn{background-image:linear-gradient(90deg,#00d37a,#00ff88)}
+#add-type-btn{background-image:linear-gradient(90deg,#00ff88,#00ffcc)}
+
+/* custom select */
+.custom-select{position:relative}
+.type-display{padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(0,255,136,0.02), transparent);border:1px solid rgba(0,255,136,0.06);color:var(--accent-2);cursor:pointer}
+.type-display.open{box-shadow:0 0 18px rgba(0,255,136,0.08)}
+.type-options{background:linear-gradient(180deg, rgba(0,20,10,0.92), var(--card));border:1px solid rgba(0,255,136,0.09);border-radius:10px;padding:6px;max-height:260px;overflow:auto;backdrop-filter:blur(6px);box-shadow:0 14px 40px rgba(0,0,0,0.6)}
+.type-option{padding:10px 12px;border-radius:6px;margin-bottom:6px;color:var(--accent-2);cursor:pointer;border:1px solid rgba(0,255,136,0.04);background:linear-gradient(180deg, rgba(0,255,136,0.02), transparent)}
+.type-option + .type-option{margin-top:6px}
+.type-option:hover,.type-option:focus{background:rgba(0,255,136,0.06);box-shadow:0 8px 26px rgba(0,255,136,0.06)}
+
+/* constrain the inline type manager container */
+#type-manager{max-width:100%;box-sizing:border-box;overflow:auto}
+
+/* Scrollbar styling for WebKit browsers */
+.type-options::-webkit-scrollbar, .cards::-webkit-scrollbar, .cards-section.right::-webkit-scrollbar{height:12px;width:12px}
+.type-options::-webkit-scrollbar-track, .cards::-webkit-scrollbar-track, .cards-section.right::-webkit-scrollbar-track{background:rgba(0,0,0,0.35);border-radius:8px}
+.type-options::-webkit-scrollbar-thumb, .cards::-webkit-scrollbar-thumb, .cards-section.right::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--accent),var(--accent-2));border-radius:8px;border:2px solid rgba(0,0,0,0.2)}
+.type-options::-webkit-scrollbar-thumb:hover{filter:brightness(1.12)}
+
+/* Firefox scrollbar colors */
+.type-options, .cards, .cards-section.right{scrollbar-width:thin;scrollbar-color: var(--accent-2) rgba(0,0,0,0.35)}
+
+/* Left panel and page scrollbar styling */
+.layout .left::-webkit-scrollbar, body::-webkit-scrollbar, html::-webkit-scrollbar{width:12px}
+.layout .left::-webkit-scrollbar-track, body::-webkit-scrollbar-track, html::-webkit-scrollbar-track{background:rgba(0,0,0,0.35);border-radius:8px}
+.layout .left::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb, html::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--accent),var(--accent-2));border-radius:8px;border:2px solid rgba(0,0,0,0.2)}
+.layout .left::-webkit-scrollbar-thumb:hover, body::-webkit-scrollbar-thumb:hover, html::-webkit-scrollbar-thumb:hover{filter:brightness(1.12)}
+
+/* Firefox for left and page */
+.layout .left, body, html{scrollbar-width:thin;scrollbar-color: var(--accent-2) rgba(0,0,0,0.35)}
 #manage-types-btn,#add-type-btn{padding:8px 12px;border-radius:10px;border:0;background:linear-gradient(90deg,#00ff88,#00ffa8);color:#00110a;cursor:pointer;box-shadow:var(--glow);transition:transform .14s}
 #manage-types-btn:hover,#add-type-btn:hover{transform:translateY(-3px)}
 #manage-types-btn{background-image:linear-gradient(90deg,#00d37a,#00ff88)}
