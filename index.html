@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Resourciffy</title>
+  <!-- Stylish heading font -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Resourciffy</h1>
+      <p>Save and manage website resources (name, description, link).</p>
+    </header>
+
+    <div class="layout">
+      <aside class="left">
+        <section class="form-section">
+          <form id="resource-form">
+        <input type="hidden" id="resource-id">
+        <div class="field name-field">
+          <label for="name">Name</label>
+          <input id="name" name="name" required maxlength="120" placeholder="Enter resource name">
+        </div>
+        <div class="field">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" rows="3" maxlength="500" placeholder="Short description"></textarea>
+        </div>
+        <div class="field">
+          <label for="type-select">Type</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select id="type-select" name="type" style="flex:1;padding:10px;border-radius:8px;background:transparent;color:inherit;border:1px solid rgba(0,255,136,0.06)"></select>
+            <button id="manage-types-btn" type="button">Manage</button>
+          </div>
+          <div id="type-manager" style="display:none;margin-top:8px">
+            <div style="display:flex;gap:8px">
+              <input id="new-type-input" placeholder="Add new type (e.g. Article)" style="flex:1;padding:8px;border-radius:8px;background:transparent;color:inherit;border:1px solid rgba(0,255,136,0.06)">
+              <button id="add-type-btn" type="button">Add</button>
+            </div>
+            <div id="types-list" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="link">Link</label>
+          <input id="link" name="link" type="url" placeholder="https://example.com" required>
+        </div>
+        <div class="actions">
+          <button type="submit" id="save-btn">Save</button>
+          <button type="button" id="clear-btn">Clear</button>
+        </div>
+          </form>
+          <div class="file-actions" style="margin-top:12px;display:flex;gap:8px">
+        <button id="save-device">Save to device</button>
+        <button id="load-device">Load from device</button>
+        <button id="export-json">Export JSON</button>
+        <label for="import-file" class="import-label" style="display:inline-block">
+          <input id="import-file" type="file" accept="application/json" style="display:none">
+          <button id="import-json" type="button">Import JSON</button>
+        </label>
+          </div>
+        </section>
+      </aside>
+
+      <section class="cards-section right">
+        <div id="cards" class="cards"></div>
+      </section>
+    </div>
+
+    <footer>
+      <small>Resources are stored locally in your browser's localStorage.</small>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
