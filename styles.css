@@ -73,7 +73,7 @@ header h1{margin:0 0 6px;color:var(--accent-2);text-shadow:0 0 12px rgba(0,255,1
 .card{background:linear-gradient(180deg, rgba(0,20,10,0.6), var(--card));padding:18px;border-radius:14px;box-shadow:var(--glow);display:flex;flex-direction:column;gap:10px;font-size:1.04rem;border:1px solid rgba(0,255,136,0.04);transform:translateY(6px);opacity:0;animation:cardIn .45s cubic-bezier(.2,.9,.2,1) forwards;min-width:0}
 .card .title{font-weight:700}
 .card .desc{color:var(--muted);font-size:0.95rem}
-.card .link{color:var(--accent);text-decoration:underline;transition:text-shadow .15s;display:inline-block;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
+.card .link{color:var(--accent);text-decoration:none;transition:text-shadow .15s;display:inline-block;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
 .card .link:hover{text-shadow:0 0 10px rgba(0,255,136,0.16)}
 
 /* Ensure title/desc row doesn't force overflow */
