@@ -1,5 +1,6 @@
 # 🗃️ Resourciffy
 
+Live Link : https://resourciffy.vercel.app/
 A tiny, static web app to save and manage multiple resources in one place. It's dependency-free (vanilla HTML/CSS/JS) and designed to be portable — open `index.html` in your browser or serve the folder with a simple static server.
 
 ---
